@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="เวรชันสูตร">
+<title>เวรชันสูตร</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #4a3880;
+    --primary-light: #f0edf9;
+    --primary-mid: #6b52b8;
+    --accent: #c0392b;
+    --bg: #f6f5fb;
+    --card: #ffffff;
+    --text: #1a1830;
+    --text-muted: #7b72a0;
+    --border: #e0daf0;
+    --danger: #e84040;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    background: var(--primary);
+    color: #fff;
+    padding: 52px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+
+  .month-nav { display: flex; align-items: center; gap: 16px; }
+
+  .nav-btn {
+    background: rgba(255,255,255,0.18);
+    border: none;
+    color: #fff;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .nav-btn:active { background: rgba(255,255,255,0.30); }
+
+  .month-label {
+    font-size: 17px; font-weight: 600;
+    min-width: 120px; text-align: center;
+  }
+
+  /* Weekdays */
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--primary);
+    padding: 4px 8px 8px;
+  }
+  .weekday {
+    text-align: center; font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.7); padding: 2px 0;
+  }
+
+  /* Calendar */
+  .calendar-wrap { padding-bottom: 220px; }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px; padding: 8px;
+    background: var(--bg);
+  }
+
+  .day-cell {
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    min-height: 58px;
+    display: flex; flex-direction: column;
+    align-items: center; padding: 6px 2px 4px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .day-cell:active { background: var(--primary-light); }
+  .day-cell.today { border-color: var(--primary); }
+  .day-cell.has-data { background: var(--primary-light); }
+  .day-cell.empty { background: transparent; cursor: default; pointer-events: none; }
+
+  .day-num { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1; }
+
+  .day-cell.today .day-num {
+    background: var(--primary); color: #fff;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+
+  .day-cell.sunday .day-num { color: #c0392b; }
+  .day-cell.saturday .day-num { color: #2471a3; }
+
+  .day-income {
+    font-size: 9px; font-weight: 700; color: var(--primary);
+    margin-top: 3px; text-align: center; line-height: 1.2;
+  }
+
+  .day-cases {
+    font-size: 8.5px; color: var(--text-muted);
+    text-align: center; line-height: 1.3;
+  }
+
+  /* Summary bottom panel */
+  .summary-panel {
+    position: fixed;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: var(--card);
+    border-top: 1.5px solid var(--border);
+    padding: 12px 16px 28px;
+    z-index: 90;
+    box-shadow: 0 -4px 24px rgba(74,56,128,0.10);
+  }
+
+  .panel-title {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 10px;
+  }
+
+  .panel-row {
+    display: flex; gap: 8px; margin-bottom: 8px; align-items: stretch;
+  }
+
+  .panel-input-group {
+    flex: 1;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    padding: 7px 10px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+
+  .panel-input-label {
+    font-size: 10px; font-weight: 600; color: var(--text-muted);
+  }
+
+  .panel-input {
+    border: none; background: transparent;
+    font-size: 15px; font-weight: 600;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--text);
+    width: 100%; outline: none;
+    padding: 0;
+  }
+
+  .panel-result-box {
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    display: flex; flex-direction: column;
+    align-items: flex-end; justify-content: center;
+    min-width: 110px;
+  }
+
+  .panel-result-label { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 500; }
+  .panel-result-val { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+
+  .panel-fixed-row {
+    display: flex; gap: 6px; margin-bottom: 8px;
+    font-size: 11px;
+  }
+
+  .fixed-chip {
+    background: var(--primary-light);
+    border-radius: 20px;
+    padding: 4px 10px;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .grand-total-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+  }
+
+  .grand-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); }
+  .grand-val { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+
+  /* Modal Overlay */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(20,10,40,0.45);
+    z-index: 200; align-items: flex-end; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+
+  /* Bottom sheet */
+  .sheet {
+    background: var(--card);
+    border-radius: 24px 24px 0 0;
+    width: 100%; max-width: 430px;
+    padding: 0 0 40px;
+    animation: slideUp 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    max-height: 90vh; overflow-y: auto;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .sheet-handle {
+    width: 40px; height: 4px;
+    background: var(--border); border-radius: 2px;
+    margin: 12px auto 0;
+  }
+
+  .sheet-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .sheet-title { font-size: 17px; font-weight: 700; color: var(--primary); }
+  .sheet-date { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .close-btn {
+    background: var(--bg); border: none;
+    width: 32px; height: 32px; border-radius: 50%;
+    font-size: 16px; cursor: pointer; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Form */
+  .form-body { padding: 16px 20px; }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-label {
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+
+  .case-row {
+    display: flex; gap: 10px; align-items: center;
+  }
+
+  .case-input-wrap {
+    flex: 1; position: relative;
+  }
+
+  .form-input {
+    width: 100%; padding: 12px 50px 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 16px; font-family: 'Sarabun', sans-serif;
+    color: var(--text); background: var(--bg);
+    outline: none; transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .form-input:focus { border-color: var(--primary-mid); background: #fff; }
+
+  .suffix-label {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px; color: var(--text-muted); font-weight: 500;
+    pointer-events: none;
+  }
+
+  .rate-badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 12px; font-weight: 700;
+    padding: 6px 10px; border-radius: var(--radius-sm);
+    white-space: nowrap; min-width: 72px; text-align: center;
+  }
+
+  /* Result card */
+  .result-card {
+    margin: 0 20px 16px;
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1.5px solid rgba(107,82,184,0.2);
+  }
+
+  .result-title {
+    font-size: 12px; font-weight: 700; color: var(--primary);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+  }
+
+  .result-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; font-size: 14px;
+  }
+
+  .result-row-label { color: var(--text-muted); }
+  .result-row-val { font-weight: 600; color: var(--text); }
+
+  .result-divider { height: 1px; background: rgba(107,82,184,0.18); margin: 8px 0; }
+
+  .result-total-row {
+    display: flex; justify-content: space-between; align-items: center; padding-top: 4px;
+  }
+  .result-total-label { font-size: 15px; font-weight: 700; color: var(--primary); }
+  .result-total-val { font-size: 20px; font-weight: 700; color: var(--primary); }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 10px; padding: 0 20px; }
+
+  .btn {
+    flex: 1; padding: 14px; border-radius: var(--radius-sm);
+    font-size: 15px; font-weight: 700; font-family: 'Sarabun', sans-serif;
+    cursor: pointer; border: none;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-danger { background: #fde8e8; color: var(--danger); flex: 0; padding: 14px 18px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>🔬 เวรชันสูตร</h1>
+  </div>
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <span class="month-label" id="monthLabel"></span>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+</div>
+
+<div class="weekdays">
+  <div class="weekday">อา</div>
+  <div class="weekday">จ</div>
+  <div class="weekday">อ</div>
+  <div class="weekday">พ</div>
+  <div class="weekday">พฤ</div>
+  <div class="weekday">ศ</div>
+  <div class="weekday">ส</div>
+</div>
+
+<div class="calendar-wrap">
+  <div class="calendar-grid" id="calGrid"></div>
+</div>
+
+<!-- Bottom Summary Panel -->
+<div class="summary-panel">
+  <div class="panel-title">สรุปรายเดือน</div>
+
+  <div class="panel-row">
+    <div class="panel-input-group">
+      <div class="panel-input-label">จำนวนเวร (เวร)</div>
+      <input class="panel-input" type="number" id="inShiftCount" placeholder="0" inputmode="decimal" oninput="updateGrand()">
+    </div>
+    <div class="panel-result-box">
+      <div class="panel-result-label">รายได้จากเคส</div>
+      <div class="panel-result-val" id="panelCaseTotal">฿0</div>
+    </div>
+  </div>
+
+  <div class="panel-fixed-row">
+    <div class="fixed-chip">+฿15,000</div>
+    <div class="fixed-chip">+฿33,200</div>
+    <div class="fixed-chip">+฿10,000</div>
+    <div style="font-size:11px;color:var(--text-muted);align-self:center;margin-left:2px;">= ฿58,200 คงที่</div>
+  </div>
+
+  <div class="grand-total-bar">
+    <div class="grand-label">รวมทั้งเดือน</div>
+    <div class="grand-val" id="grandTotal">฿0</div>
+  </div>
+</div>
+
+<!-- Bottom Sheet Modal -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-title" id="sheetTitle"></div>
+        <div class="sheet-date" id="sheetDate"></div>
+      </div>
+      <button class="close-btn" onclick="closeSheet()">✕</button>
+    </div>
+
+    <div class="form-body">
+      <div class="form-group">
+        <label class="form-label">🚗 ชันสูตรนอก</label>
+        <div class="case-row">
+          <div class="case-input-wrap">
+            <input class="form-input" type="number" id="inOut" placeholder="0" inputmode="numeric" oninput="calcPreview()">
+            <span class="suffix-label">ราย</span>
+          </div>
+          <div class="rate-badge">฿1,800/ราย</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🏥 ชันสูตรใน</label>
+        <div class="case-row">
+          <div class="case-input-wrap">
+            <input class="form-input" type="number" id="inIn" placeholder="0" inputmode="numeric" oninput="calcPreview()">
+            <span class="suffix-label">ราย</span>
+          </div>
+          <div class="rate-badge">฿1,200/ราย</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">⚕️ ผ่าศพ</label>
+        <div class="case-row">
+          <div class="case-input-wrap">
+            <input class="form-input" type="number" id="inAutopsy" placeholder="0" inputmode="numeric" oninput="calcPreview()">
+            <span class="suffix-label">ราย</span>
+          </div>
+          <div class="rate-badge">฿4,500/ราย</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live result -->
+    <div class="result-card">
+      <div class="result-title">สรุปเวรวันนี้</div>
+      <div class="result-row">
+        <span class="result-row-label">ชันสูตรนอก</span>
+        <span class="result-row-val" id="rOut">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-row-label">ชันสูตรใน</span>
+        <span class="result-row-val" id="rIn">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-row-label">ผ่าศพ</span>
+        <span class="result-row-val" id="rAutopsy">—</span>
+      </div>
+      <div class="result-divider"></div>
+      <div class="result-total-row">
+        <span class="result-total-label">รวมวันนี้</span>
+        <span class="result-total-val" id="rTotal">฿0</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="clearDay()" id="btnClear" style="display:none">ลบ</button>
+      <button class="btn btn-primary" onclick="saveDay()">บันทึก ✓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const RATE_OUT = 1800, RATE_IN = 1200, RATE_AUTOPSY = 4500;
+const FIXED = 15000 + 33200 + 10000;
+
+let today = new Date();
+let curYear = today.getFullYear();
+let curMonth = today.getMonth();
+let selectedDay = null;
+
+function storageKey(y, m) { return `forensic_${y}_${m}`; }
+function storageMetaKey(y, m) { return `forensic_meta_${y}_${m}`; }
+
+function getData(y, m) {
+  try { return JSON.parse(localStorage.getItem(storageKey(y, m)) || '{}'); }
+  catch(e) { return {}; }
+}
+function saveData(y, m, data) {
+  localStorage.setItem(storageKey(y, m), JSON.stringify(data));
+}
+function getMeta(y, m) {
+  try { return JSON.parse(localStorage.getItem(storageMetaKey(y, m)) || '{}'); }
+  catch(e) { return {}; }
+}
+function saveMeta(y, m, meta) {
+  localStorage.setItem(storageMetaKey(y, m), JSON.stringify(meta));
+}
+
+function fmt(n) {
+  if (!n && n !== 0) return '—';
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+function fmtCompact(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(0)+'k';
+  return Math.round(n).toLocaleString('th-TH');
+}
+
+function changeMonth(delta) {
+  curMonth += delta;
+  if (curMonth < 0) { curMonth = 11; curYear--; }
+  if (curMonth > 11) { curMonth = 0; curYear++; }
+  renderCalendar();
+  loadMeta();
+}
+
+function renderCalendar() {
+  document.getElementById('monthLabel').textContent = MONTHS_TH[curMonth] + ' ' + (curYear + 543);
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  const data = getData(curYear, curMonth);
+  const firstDay = new Date(curYear, curMonth, 1).getDay();
+  const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'day-cell empty';
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement('div');
+    const dow = (firstDay + d - 1) % 7;
+    let cls = 'day-cell';
+    if (dow === 0) cls += ' sunday';
+    if (dow === 6) cls += ' saturday';
+    if (d === today.getDate() && curMonth === today.getMonth() && curYear === today.getFullYear()) cls += ' today';
+    const dayData = data[d];
+    if (dayData && dayData.total > 0) cls += ' has-data';
+    cell.className = cls;
+
+    const numEl = document.createElement('div');
+    numEl.className = 'day-num';
+    numEl.textContent = d;
+    cell.appendChild(numEl);
+
+    if (dayData && dayData.total > 0) {
+      const incEl = document.createElement('div');
+      incEl.className = 'day-income';
+      incEl.textContent = fmtCompact(dayData.total);
+      cell.appendChild(incEl);
+
+      const parts = [];
+      if (dayData.caseOut > 0) parts.push(`นอก×${dayData.caseOut}`);
+      if (dayData.caseIn > 0) parts.push(`ใน×${dayData.caseIn}`);
+      if (dayData.autopsy > 0) parts.push(`ผ่า×${dayData.autopsy}`);
+      if (parts.length) {
+        const caseEl = document.createElement('div');
+        caseEl.className = 'day-cases';
+        caseEl.textContent = parts.join(' ');
+        cell.appendChild(caseEl);
+      }
+    }
+
+    cell.addEventListener('click', () => openSheet(d));
+    grid.appendChild(cell);
+  }
+
+  updateCaseTotal();
+}
+
+function openSheet(day) {
+  selectedDay = day;
+  const data = getData(curYear, curMonth);
+  const dayData = data[day] || {};
+  const dateObj = new Date(curYear, curMonth, day);
+  const dayNames = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+
+  document.getElementById('sheetTitle').textContent = `วันที่ ${day} ${MONTHS_TH[curMonth]}`;
+  document.getElementById('sheetDate').textContent = `วัน${dayNames[dateObj.getDay()]}`;
+
+  document.getElementById('inOut').value = dayData.caseOut || '';
+  document.getElementById('inIn').value = dayData.caseIn || '';
+  document.getElementById('inAutopsy').value = dayData.autopsy || '';
+
+  document.getElementById('btnClear').style.display = dayData.total ? 'block' : 'none';
+  calcPreview();
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSheet() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  selectedDay = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeSheet();
+}
+
+function calcPreview() {
+  const caseOut = parseInt(document.getElementById('inOut').value) || 0;
+  const caseIn = parseInt(document.getElementById('inIn').value) || 0;
+  const autopsy = parseInt(document.getElementById('inAutopsy').value) || 0;
+
+  const feeOut = caseOut * RATE_OUT;
+  const feeIn = caseIn * RATE_IN;
+  const feeAutopsy = autopsy * RATE_AUTOPSY;
+  const total = feeOut + feeIn + feeAutopsy;
+
+  document.getElementById('rOut').textContent = feeOut > 0 ? `${fmt(feeOut)} (${caseOut} ราย)` : '—';
+  document.getElementById('rIn').textContent = feeIn > 0 ? `${fmt(feeIn)} (${caseIn} ราย)` : '—';
+  document.getElementById('rAutopsy').textContent = feeAutopsy > 0 ? `${fmt(feeAutopsy)} (${autopsy} ราย)` : '—';
+  document.getElementById('rTotal').textContent = fmt(total);
+}
+
+function saveDay() {
+  if (!selectedDay) return;
+  const caseOut = parseInt(document.getElementById('inOut').value) || 0;
+  const caseIn = parseInt(document.getElementById('inIn').value) || 0;
+  const autopsy = parseInt(document.getElementById('inAutopsy').value) || 0;
+  const total = caseOut * RATE_OUT + caseIn * RATE_IN + autopsy * RATE_AUTOPSY;
+
+  const data = getData(curYear, curMonth);
+  data[selectedDay] = { caseOut, caseIn, autopsy, total };
+  saveData(curYear, curMonth, data);
+  closeSheet();
+  renderCalendar();
+}
+
+function clearDay() {
+  if (!selectedDay) return;
+  const data = getData(curYear, curMonth);
+  delete data[selectedDay];
+  saveData(curYear, curMonth, data);
+  closeSheet();
+  renderCalendar();
+}
+
+function updateCaseTotal() {
+  const data = getData(curYear, curMonth);
+  let total = 0;
+  Object.values(data).forEach(d => { if (d && d.total) total += d.total; });
+  document.getElementById('panelCaseTotal').textContent = '฿' + Math.round(total).toLocaleString('th-TH');
+  updateGrand();
+}
+
+function updateGrand() {
+  const data = getData(curYear, curMonth);
+  let caseTotal = 0;
+  Object.values(data).forEach(d => { if (d && d.total) caseTotal += d.total; });
+
+  const shiftCount = parseInt(document.getElementById('inShiftCount').value) || 0;
+  const meta = getMeta(curYear, curMonth);
+  meta.shiftCount = shiftCount;
+  saveMeta(curYear, curMonth, meta);
+
+  const grand = caseTotal + FIXED;
+  document.getElementById('grandTotal').textContent = '฿' + Math.round(grand).toLocaleString('th-TH');
+}
+
+function loadMeta() {
+  const meta = getMeta(curYear, curMonth);
+  document.getElementById('inShiftCount').value = meta.shiftCount || '';
+  updateGrand();
+}
+
+renderCalendar();
+loadMeta();
+</script>
+</body>
+</html>
