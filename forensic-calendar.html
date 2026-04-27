@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="เวรชันสูตร">
+<title>เวรชันสูตร</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #4a3880;
+    --primary-light: #f0edf9;
+    --primary-mid: #6b52b8;
+    --accent: #c0392b;
+    --bg: #f6f5fb;
+    --card: #ffffff;
+    --text: #1a1830;
+    --text-muted: #7b72a0;
+    --border: #e0daf0;
+    --danger: #e84040;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    background: var(--primary);
+    color: #fff;
+    padding: 52px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+
+  .month-nav { display: flex; align-items: center; gap: 16px; }
+
+  .nav-btn {
+    background: rgba(255,255,255,0.18);
+    border: none;
+    color: #fff;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .nav-btn:active { background: rgba(255,255,255,0.30); }
+
+  .month-label {
+    font-size: 17px; font-weight: 600;
+    min-width: 120px; text-align: center;
+  }
+
+  /* Main content */
+  .main-content { padding: 16px 16px 260px; }
+
+  /* Quick mode */
+  .quick-card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1.5px solid var(--border); padding: 16px; margin-bottom: 12px;
+  }
+  .quick-card-title {
+    font-size: 12px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+  }
+  .quick-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .quick-row:last-child { margin-bottom: 0; }
+  .quick-label {
+    font-size: 14px; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 6px; min-width: 110px;
+  }
+  .quick-input-wrap { flex: 1; position: relative; }
+  .quick-input {
+    width: 100%; padding: 10px 44px 10px 12px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 15px; font-family: 'Sarabun', sans-serif;
+    color: var(--text); background: var(--bg);
+    outline: none; -webkit-appearance: none;
+    transition: border-color 0.15s;
+  }
+  .quick-input:focus { border-color: var(--primary-mid); background: #fff; }
+  .quick-suffix {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    font-size: 12px; color: var(--text-muted); font-weight: 500; pointer-events: none;
+  }
+  .quick-badge {
+    background: var(--primary-light); color: var(--primary);
+    font-size: 11px; font-weight: 700; padding: 4px 8px;
+    border-radius: var(--radius-sm); white-space: nowrap;
+  }
+
+  .quick-result-card {
+    background: var(--primary-light); border-radius: var(--radius);
+    border: 1.5px solid rgba(107,82,184,0.2); padding: 16px; margin-bottom: 12px;
+  }
+  .qr-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; font-size: 14px;
+  }
+  .qr-label { color: var(--text-muted); }
+  .qr-val { font-weight: 600; color: var(--text); }
+  .qr-divider { height: 1px; background: rgba(107,82,184,0.18); margin: 8px 0; }
+  .qr-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+  .qr-total-label { font-size: 15px; font-weight: 700; color: var(--primary); }
+  .qr-total-val { font-size: 22px; font-weight: 700; color: var(--primary); }
+
+  /* Fixed cost card */
+  .fixed-cost-card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1.5px solid var(--border); padding: 16px; margin-bottom: 12px;
+  }
+  .fixed-cost-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .fixed-cost-title {
+    font-size: 12px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .add-fixed-btn {
+    background: var(--primary-light); border: none; color: var(--primary);
+    font-size: 12px; font-weight: 700; padding: 5px 12px;
+    border-radius: 20px; cursor: pointer; font-family: 'Sarabun', sans-serif;
+    display: flex; align-items: center; gap: 4px;
+    transition: background 0.15s;
+  }
+  .add-fixed-btn:active { background: var(--border); }
+
+  .fixed-item {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .fixed-item:last-child { margin-bottom: 0; }
+
+  .fixed-item-name {
+    flex: 1; padding: 8px 10px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: 'Sarabun', sans-serif;
+    color: var(--text); background: var(--bg);
+    outline: none; transition: border-color 0.15s;
+  }
+  .fixed-item-name:focus { border-color: var(--primary-mid); background: #fff; }
+
+  .fixed-item-amount {
+    width: 100px; padding: 8px 10px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: 'Sarabun', sans-serif;
+    color: var(--text); background: var(--bg);
+    outline: none; -webkit-appearance: none;
+    transition: border-color 0.15s; text-align: right;
+  }
+  .fixed-item-amount:focus { border-color: var(--primary-mid); background: #fff; }
+
+  .del-fixed-btn {
+    background: #fde8e8; border: none; color: var(--danger);
+    width: 30px; height: 30px; border-radius: 50%;
+    font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.15s;
+  }
+  .del-fixed-btn:active { background: #f9c5c5; }
+
+  .fixed-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 10px; margin-top: 10px;
+    border-top: 1.5px dashed var(--border);
+    font-size: 13px; font-weight: 700; color: var(--primary);
+  }
+
+  /* Summary bottom panel */
+  .summary-panel {
+    position: fixed;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: var(--card);
+    border-top: 1.5px solid var(--border);
+    padding: 12px 16px 28px;
+    z-index: 90;
+    box-shadow: 0 -4px 24px rgba(74,56,128,0.10);
+  }
+
+  .panel-title {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 10px;
+  }
+
+  .panel-row {
+    display: flex; gap: 8px; margin-bottom: 8px; align-items: stretch;
+  }
+
+  .panel-input-group {
+    flex: 1;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    padding: 7px 10px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+
+  .panel-input-label {
+    font-size: 10px; font-weight: 600; color: var(--text-muted);
+  }
+
+  .panel-input {
+    border: none; background: transparent;
+    font-size: 15px; font-weight: 600;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--text);
+    width: 100%; outline: none;
+    padding: 0;
+  }
+
+  .panel-result-box {
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    display: flex; flex-direction: column;
+    align-items: flex-end; justify-content: center;
+    min-width: 110px;
+  }
+
+  .panel-result-label { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 500; }
+  .panel-result-val { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+
+  .grand-total-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+  }
+
+  .grand-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); }
+  .grand-val { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>🔬 เวรชันสูตร</h1>
+  </div>
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <span class="month-label" id="monthLabel"></span>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+</div>
+
+<div class="main-content">
+
+  <!-- Input card -->
+  <div class="quick-card">
+    <div class="quick-card-title">กรอกยอดเคสทั้งเดือน</div>
+    <div class="quick-row">
+      <span class="quick-label">🚗 ชันสูตรนอก</span>
+      <div class="quick-input-wrap">
+        <input class="quick-input" type="number" id="qOut" placeholder="0" inputmode="numeric" oninput="calcQuick()">
+        <span class="quick-suffix">ราย</span>
+      </div>
+      <div class="quick-badge">×฿1,800</div>
+    </div>
+    <div class="quick-row">
+      <span class="quick-label">🏥 ชันสูตรใน</span>
+      <div class="quick-input-wrap">
+        <input class="quick-input" type="number" id="qIn" placeholder="0" inputmode="numeric" oninput="calcQuick()">
+        <span class="quick-suffix">ราย</span>
+      </div>
+      <div class="quick-badge">×฿1,200</div>
+    </div>
+    <div class="quick-row">
+      <span class="quick-label">⚕️ ผ่าศพ</span>
+      <div class="quick-input-wrap">
+        <input class="quick-input" type="number" id="qAutopsy" placeholder="0" inputmode="numeric" oninput="calcQuick()">
+        <span class="quick-suffix">ราย</span>
+      </div>
+      <div class="quick-badge">×฿4,500</div>
+    </div>
+    <div class="quick-row">
+      <span class="quick-label">📋 จำนวนเวร</span>
+      <div class="quick-input-wrap">
+        <input class="quick-input" type="number" id="qShift" placeholder="0" inputmode="numeric" oninput="calcQuick()">
+        <span class="quick-suffix">เวร</span>
+      </div>
+      <div class="quick-badge">×฿660</div>
+    </div>
+  </div>
+
+  <!-- Fixed cost card -->
+  <div class="fixed-cost-card">
+    <div class="fixed-cost-header">
+      <div class="fixed-cost-title">💰 รายได้คงที่</div>
+      <button class="add-fixed-btn" onclick="addFixedItem()">+ เพิ่มรายการ</button>
+    </div>
+    <div id="fixedItemsList"></div>
+    <div class="fixed-total-row">
+      <span>รวมรายได้คงที่</span>
+      <span id="fixedTotalDisplay">฿0</span>
+    </div>
+  </div>
+
+  <!-- Result card -->
+  <div class="quick-result-card">
+    <div class="quick-card-title">สรุปผลคำนวณ</div>
+    <div class="qr-row"><span class="qr-label">ชันสูตรนอก</span><span class="qr-val" id="qqOut">—</span></div>
+    <div class="qr-row"><span class="qr-label">ชันสูตรใน</span><span class="qr-val" id="qqIn">—</span></div>
+    <div class="qr-row"><span class="qr-label">ผ่าศพ</span><span class="qr-val" id="qqAutopsy">—</span></div>
+    <div class="qr-row"><span class="qr-label">ค่าเวร (เวร × ฿660)</span><span class="qr-val" id="qqShift">—</span></div>
+    <div class="qr-row"><span class="qr-label">รายได้คงที่</span><span class="qr-val" id="qqFixed">฿0</span></div>
+    <div class="qr-divider"></div>
+    <div class="qr-total-row">
+      <span class="qr-total-label">รวมทั้งเดือน</span>
+      <span class="qr-total-val" id="qqTotal">฿0</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Summary Panel -->
+<div class="summary-panel">
+  <div class="grand-total-bar">
+    <div class="grand-label">รวมทั้งเดือน</div>
+    <div class="grand-val" id="grandTotal">฿0</div>
+  </div>
+</div>
+
+<script>
+const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const RATE_OUT = 1800, RATE_IN = 1200, RATE_AUTOPSY = 4500, RATE_SHIFT = 660;
+
+let today = new Date();
+let curYear = today.getFullYear();
+let curMonth = today.getMonth();
+
+// ---- Storage helpers ----
+function metaKey(y, m) { return `fm_meta_${y}_${m}`; }
+function fixedKey() { return 'fm_fixed_items'; } // fixed cost shared across all months
+
+function getMeta(y, m) {
+  try { return JSON.parse(localStorage.getItem(metaKey(y, m)) || '{}'); }
+  catch(e) { return {}; }
+}
+function saveMeta(y, m, meta) {
+  localStorage.setItem(metaKey(y, m), JSON.stringify(meta));
+}
+
+// Fixed items: [{id, name, amount}] — shared, not per-month
+function getFixedItems() {
+  try {
+    const raw = localStorage.getItem(fixedKey());
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  // default items
+  return [
+    { id: 'f1', name: 'เงินประจำตำแหน่ง', amount: 15000 },
+    { id: 'f2', name: 'เงินเดือน', amount: 33200 },
+    { id: 'f3', name: 'เงินเพิ่มพิเศษ', amount: 10000 }
+  ];
+}
+function saveFixedItems(items) {
+  localStorage.setItem(fixedKey(), JSON.stringify(items));
+}
+
+function genId() { return 'f' + Date.now() + Math.random().toString(36).slice(2,5); }
+
+// ---- Formatting ----
+function fmt(n) {
+  if (!n && n !== 0) return '—';
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+// ---- Month navigation ----
+function changeMonth(delta) {
+  curMonth += delta;
+  if (curMonth < 0) { curMonth = 11; curYear--; }
+  if (curMonth > 11) { curMonth = 0; curYear++; }
+  document.getElementById('monthLabel').textContent = MONTHS_TH[curMonth] + ' ' + (curYear + 543);
+  loadMonthData();
+}
+
+function loadMonthData() {
+  const meta = getMeta(curYear, curMonth);
+  document.getElementById('qOut').value = meta.qOut || '';
+  document.getElementById('qIn').value = meta.qIn || '';
+  document.getElementById('qAutopsy').value = meta.qAutopsy || '';
+  document.getElementById('qShift').value = meta.qShift || '';
+  calcQuick();
+}
+
+// ---- Calc ----
+function calcQuick() {
+  const qOut = parseInt(document.getElementById('qOut').value) || 0;
+  const qIn = parseInt(document.getElementById('qIn').value) || 0;
+  const qAutopsy = parseInt(document.getElementById('qAutopsy').value) || 0;
+  const qShift = parseInt(document.getElementById('qShift').value) || 0;
+
+  const fOut = qOut * RATE_OUT;
+  const fIn = qIn * RATE_IN;
+  const fAutopsy = qAutopsy * RATE_AUTOPSY;
+  const fShift = qShift * RATE_SHIFT;
+  const fixedTotal = getFixedTotal();
+  const total = fOut + fIn + fAutopsy + fShift + fixedTotal;
+
+  document.getElementById('qqOut').textContent = fOut > 0 ? `฿${Math.round(fOut).toLocaleString('th-TH')} (${qOut} ราย)` : '—';
+  document.getElementById('qqIn').textContent = fIn > 0 ? `฿${Math.round(fIn).toLocaleString('th-TH')} (${qIn} ราย)` : '—';
+  document.getElementById('qqAutopsy').textContent = fAutopsy > 0 ? `฿${Math.round(fAutopsy).toLocaleString('th-TH')} (${qAutopsy} ราย)` : '—';
+  document.getElementById('qqShift').textContent = fShift > 0 ? `฿${Math.round(fShift).toLocaleString('th-TH')} (${qShift} เวร)` : '—';
+  document.getElementById('qqFixed').textContent = fmt(fixedTotal);
+  document.getElementById('qqTotal').textContent = '฿' + Math.round(total).toLocaleString('th-TH');
+  document.getElementById('grandTotal').textContent = '฿' + Math.round(total).toLocaleString('th-TH');
+
+  // Save monthly data
+  const meta = getMeta(curYear, curMonth);
+  meta.qOut = qOut; meta.qIn = qIn; meta.qAutopsy = qAutopsy; meta.qShift = qShift;
+  saveMeta(curYear, curMonth, meta);
+}
+
+// ---- Fixed cost helpers ----
+function getFixedTotal() {
+  return getFixedItems().reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+}
+
+function renderFixedItems() {
+  const items = getFixedItems();
+  const list = document.getElementById('fixedItemsList');
+  list.innerHTML = '';
+
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'fixed-item';
+    row.innerHTML = `
+      <input class="fixed-item-name" type="text" value="${escHtml(item.name)}" placeholder="ชื่อรายการ"
+        oninput="updateFixedItem('${item.id}', 'name', this.value)">
+      <input class="fixed-item-amount" type="number" value="${item.amount}" placeholder="0" inputmode="decimal"
+        oninput="updateFixedItem('${item.id}', 'amount', this.value)">
+      <button class="del-fixed-btn" onclick="deleteFixedItem('${item.id}')">✕</button>
+    `;
+    list.appendChild(row);
+  });
+
+  const total = getFixedTotal();
+  document.getElementById('fixedTotalDisplay').textContent = fmt(total);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addFixedItem() {
+  const items = getFixedItems();
+  items.push({ id: genId(), name: '', amount: 0 });
+  saveFixedItems(items);
+  renderFixedItems();
+  calcQuick();
+}
+
+function deleteFixedItem(id) {
+  const items = getFixedItems().filter(i => i.id !== id);
+  saveFixedItems(items);
+  renderFixedItems();
+  calcQuick();
+}
+
+function updateFixedItem(id, field, value) {
+  const items = getFixedItems();
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  if (field === 'amount') item.amount = parseFloat(value) || 0;
+  else item[field] = value;
+  saveFixedItems(items);
+  document.getElementById('fixedTotalDisplay').textContent = fmt(getFixedTotal());
+  calcQuick();
+}
+
+// ---- Init ----
+document.getElementById('monthLabel').textContent = MONTHS_TH[curMonth] + ' ' + (curYear + 543);
+renderFixedItems();
+loadMonthData();
+</script>
+</body>
+</html>
